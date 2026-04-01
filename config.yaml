@@ -1,0 +1,146 @@
+# ============================================================
+# config.yaml — Central Configuration for FDS Pipeline
+# ============================================================
+
+# ── Paths ──────────────────────────────────────────────────
+paths:
+  data_dir: "elliptic_bitcoin_dataset"
+  features_file: "elliptic_bitcoin_dataset/elliptic_txs_features.csv"
+  edges_file: "elliptic_bitcoin_dataset/elliptic_txs_edgelist.csv"
+  classes_file: "elliptic_bitcoin_dataset/elliptic_txs_classes.csv"
+  checkpoints_dir: "results/checkpoints"
+  models_dir: "results/models"
+  figures_dir: "results/figures"
+  reports_dir: "results/reports"
+  logs_dir: "results/logs"
+
+# ── Dataset ────────────────────────────────────────────────
+dataset:
+  # Column assignments in features CSV (no header)
+  txid_col: 0
+  timestep_col: 1
+  local_feature_cols: [2, 94]      # inclusive range → 93 features
+  agg_feature_cols: [95, 165]      # inclusive range → 71 features
+  # Temporal train/test split (Weber et al. 2019 benchmark)
+  train_timestep_max: 34
+  test_timestep_min: 35
+  # Label mapping
+  illicit_label: 1
+  licit_label: 0
+
+# ── Feature Selection ──────────────────────────────────────
+feature_selection:
+  pca_variance_threshold: 0.95      # keep components explaining 95% variance
+  correlation_threshold: 0.95       # drop features correlated > threshold
+  variance_threshold: 0.001         # drop near-zero variance features
+  rfecv_cv_folds: 3
+  rfecv_scoring: "f1"
+  shap_top_k: 80                    # keep top-k features by SHAP importance
+
+# ── Graph / SNA ────────────────────────────────────────────
+graph:
+  pagerank_alpha: 0.85
+  betweenness_k: 500                # approx betweenness with k pivots (speed)
+  hits_max_iter: 100
+
+# ── Node2Vec ───────────────────────────────────────────────
+node2vec:
+  dimensions: 64
+  walk_length: 20                   # reduced for CPU speed
+  num_walks: 50                     # reduced for CPU speed
+  p: 1.0                            # return parameter
+  q: 0.5                            # in-out parameter (DFS-biased)
+  window: 5
+  min_count: 1
+  workers: 4
+  seed: 42
+
+# ── Community Detection ────────────────────────────────────
+community:
+  algorithm: "louvain"
+  resolution: 1.0
+  seed: 42
+
+# ── Imbalance Handling ─────────────────────────────────────
+imbalance:
+  method: "smote_enn"               # options: smote, smote_enn, adasyn
+  smote_k_neighbors: 5
+  enn_n_neighbors: 3
+  random_state: 42
+
+# ── Cross-Validation ───────────────────────────────────────
+cv:
+  n_folds: 5
+  shuffle: true
+  random_state: 42
+  scoring: "f1"
+
+# ── Hyperparameter Tuning (Optuna) ─────────────────────────
+optuna:
+  n_trials: 50                      # reduced for CPU speed (increase for production)
+  timeout: 3600                     # max seconds per study
+  direction: "maximize"
+  metric: "f1"
+  n_jobs: 1                         # CPU-only: 1 to avoid memory issues
+  seed: 42
+
+# ── Base Models ────────────────────────────────────────────
+models:
+  xgboost:
+    n_estimators: 500
+    tree_method: "hist"             # CPU-optimal
+    eval_metric: "logloss"
+    early_stopping_rounds: 30
+    random_state: 42
+  lightgbm:
+    n_estimators: 500
+    boosting_type: "gbdt"
+    n_jobs: -1
+    random_state: 42
+    verbose: -1
+  catboost:
+    iterations: 500
+    task_type: "CPU"
+    verbose: 0
+    random_seed: 42
+  random_forest:
+    n_estimators: 300
+    n_jobs: -1
+    random_state: 42
+  extra_trees:
+    n_estimators: 300
+    n_jobs: -1
+    random_state: 42
+  svm:
+    kernel: "rbf"
+    probability: true
+    cache_size: 500
+    random_state: 42
+
+# ── MLP Meta-Learner ───────────────────────────────────────
+mlp:
+  hidden_dims: [256, 128, 64]
+  dropout: 0.3
+  learning_rate: 0.001
+  weight_decay: 1.0e-5
+  batch_size: 256
+  epochs: 100
+  patience: 15                      # early stopping
+  random_state: 42
+
+# ── Hybrid Ensemble Weights ────────────────────────────────
+hybrid:
+  stacked_mlp_weight: 0.50
+  best_base_weight: 0.30
+  direct_mlp_weight: 0.20
+  threshold_search_step: 0.01       # threshold optimization granularity
+
+# ── Evaluation ─────────────────────────────────────────────
+evaluation:
+  figure_dpi: 300
+  figure_format: "pdf"              # also saves PNG
+  shap_max_display: 20
+  target_class: 1                   # illicit = positive class
+
+# ── Random Seed ────────────────────────────────────────────
+random_seed: 42

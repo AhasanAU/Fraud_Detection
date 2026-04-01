@@ -1,0 +1,50 @@
+# ============================================================
+# Fraud Detection System — Requirements
+# Python 3.11 | CPU-only
+# ============================================================
+
+# Core scientific
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.12.0
+pyarrow==16.1.0
+
+# Machine Learning
+scikit-learn==1.5.0
+xgboost==2.0.3
+lightgbm==4.3.0
+catboost==1.2.5
+
+# Imbalanced learning
+imbalanced-learn==0.12.3
+
+# Graph / Network
+networkx==2.8.8
+node2vec==0.4.6
+python-louvain==0.16
+gensim==4.3.2
+setuptools<71.0.0
+
+# Deep Learning (CPU)
+torch==2.3.0+cpu
+torchvision==0.18.0+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Hyperparameter Optimization
+optuna==3.6.1
+optuna-integration==3.6.0
+
+# Explainability
+shap==0.45.1
+
+# Visualization
+matplotlib==3.9.0
+seaborn==0.13.2
+plotly==5.22.0
+
+# Utilities
+tqdm==4.66.4
+joblib==1.4.2
+pyyaml==6.0.1
+colorlog==6.8.2
+psutil==5.9.8
